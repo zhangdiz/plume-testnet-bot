@@ -55,14 +55,10 @@ const loadConfig = () => {
 let config = loadConfig();
 
 if (!config) {
-  const txCountInput = readlineSync.question(
-    'How many transactions do you want? (default is 1): '
-  );
+  const txCountInput = readlineSync.question('How many transactions do you want? (default is 1): ');
   const transactionCount = txCountInput ? parseInt(txCountInput, 10) : 1;
 
-  const autoRunInput = readlineSync.question(
-    'Do you want to auto run this script every 24 hours? (Y/N): '
-  );
+  const autoRunInput = readlineSync.question('Do you want to auto run this script every 24 hours? (Y/N): ');
   const autoRun = autoRunInput.toLowerCase() === 'y';
 
   config = { transactionCount, autoRun };
@@ -89,46 +85,25 @@ const performTransactions = async (count) => {
         TRADE_TIP,
         LIMIT_ORDER_PRICE,
         MINIMUM_OUTPUT,
-        RESERVE_FLAGS
+        RESERVE_FLAGS,
       );
 
+      console.log(`[${moment().format('HH:mm:ss')}] Successfully swapped 0.001 $GOON to 0.999 $goonUSD from ${transactionResponse.from}!`.green);
       console.log(
-        `[${moment().format(
-          'HH:mm:ss'
-        )}] Successfully swapped 0.001 $GOON to 0.999 $goonUSD from ${
-          transactionResponse.from
-        }!`.green
-      );
-      console.log(
-        `[${moment().format(
-          'HH:mm:ss'
-        )}] Transaction hash: https://testnet-explorer.plumenetwork.xyz/tx/${
-          transactionResponse.hash
-        }`.green
+        `[${moment().format('HH:mm:ss')}] Transaction hash: https://testnet-explorer.plumenetwork.xyz/tx/${transactionResponse.hash}`.green,
       );
 
       if (count !== 0) {
         await delay(10000);
       }
     } catch (error) {
-      console.log(
-        `[${moment().format(
-          'HH:mm:ss'
-        )}] Insufficient $GOON. Please claim from the faucet first. Error details: ${
-          error.message
-        }`.red
-      );
+      console.log(`[${moment().format('HH:mm:ss')}] Insufficient $GOON. Please claim from the faucet first. Error details: ${error.message}`.red);
     }
     count--;
 
     if (count === 0) {
       console.log('');
-      console.log(
-        `[${moment().format(
-          'HH:mm:ss'
-        )}] All transactions have been completed. Congrats! Subscribe: https://t.me/HappyCuanAirdrop`
-          .blue
-      );
+      console.log(`[${moment().format('HH:mm:ss')}] All transactions have been completed. Congrats! Subscribe: https://t.me/HappyCuanAirdrop`.blue);
     }
   }
 };
@@ -148,14 +123,9 @@ const performTransactions = async (count) => {
       },
       null,
       true,
-      timeZone
+      timeZone,
     );
 
-    console.log(
-      `[${moment().format(
-        'HH:mm:ss'
-      )}] Cron job scheduled to run every 24 hours at midnight (Asia/Jakarta).`
-        .yellow
-    );
+    console.log(`[${moment().format('HH:mm:ss')}] Cron job scheduled to run every 24 hours at midnight (Asia/Jakarta).`.yellow);
   }
 })();

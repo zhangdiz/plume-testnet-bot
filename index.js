@@ -27,15 +27,10 @@ Object.keys(scriptNames).forEach((key) => {
   console.log(`${key}: ${scriptNames[key].yellow}`);
 });
 
-const userChoice = parseInt(
-  readlineSync.question('Choose a script number: '.cyan),
-  10
-);
+const userChoice = parseInt(readlineSync.question('Choose a script number: '.cyan), 10);
 
 if (scriptCommands.hasOwnProperty(userChoice)) {
   console.log(`Please run: ${scriptCommands[userChoice]}`.blue);
 } else {
-  console.log(
-    'Invalid choice! Please run the script again and choose a valid number.'.red
-  );
+  console.log('Invalid choice! Please run the script again and choose a valid number.'.red);
 }

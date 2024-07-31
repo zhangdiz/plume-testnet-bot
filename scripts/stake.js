@@ -19,18 +19,12 @@ const PRIVATE_KEYS = JSON.parse(fs.readFileSync('privateKeys.json', 'utf-8'));
 async function doStake(privateKey) {
   try {
     const wallet = createWallet(privateKey, provider);
-    const implementationContract = new Contract(
-      IMPLEMENTATION_CA,
-      STAKE_ABI,
-      wallet
-    );
+    const implementationContract = new Contract(IMPLEMENTATION_CA, STAKE_ABI, wallet);
 
     const goonContract = new Contract(GOON_CA, ERC20_ABI, wallet);
     await goonContract.approve(CA, parseEther('1'));
 
-    const data = implementationContract.interface.encodeFunctionData('stake', [
-      parseEther('0.1'),
-    ]);
+    const data = implementationContract.interface.encodeFunctionData('stake', [parseEther('0.1')]);
 
     const feeData = await wallet.provider.getFeeData();
     const gasPrice = feeData.gasPrice;
@@ -52,17 +46,9 @@ async function doStake(privateKey) {
     return txHash;
   } catch (error) {
     if (error.message.includes('CALL_EXCEPTION')) {
-      console.log(
-        `[${moment().format(
-          'HH:mm:ss'
-        )}] Insufficient balance. Please top up using the faucet first.`.red
-      );
+      console.log(`[${moment().format('HH:mm:ss')}] Insufficient balance. Please top up using the faucet first.`.red);
     } else {
-      console.log(
-        `[${moment().format('HH:mm:ss')}] Error executing transaction: ${
-          error.message
-        }`.red
-      );
+      console.log(`[${moment().format('HH:mm:ss')}] Error executing transaction: ${error.message}`.red);
     }
   }
 }
@@ -75,40 +61,20 @@ async function runStakeGoon() {
     try {
       const receipt = await doStake(PRIVATE_KEY);
       if (receipt.from) {
-        console.log(
-          `[${moment().format(
-            'HH:mm:ss'
-          )}] Successfully staked 0.1 $GOONUSD for wallet ${receipt.from}! 🌟`
-            .green
-        );
-        console.log(
-          `[${moment().format(
-            'HH:mm:ss'
-          )}] Transaction hash: https://testnet-explorer.plumenetwork.xyz/tx/${
-            receipt.hash
-          }`.green
-        );
+        console.log(`[${moment().format('HH:mm:ss')}] Successfully staked 0.1 $GOONUSD for wallet ${receipt.from}! 🌟`.green);
+        console.log(`[${moment().format('HH:mm:ss')}] Transaction hash: https://testnet-explorer.plumenetwork.xyz/tx/${receipt.hash}`.green);
         console.log('');
       }
     } catch (error) {
-      console.log(
-        `[${moment().format(
-          'HH:mm:ss'
-        )}] Error processing transaction. Please try again later.`.red
-      );
+      console.log(`[${moment().format('HH:mm:ss')}] Error processing transaction. Please try again later.`.red);
     }
   }
 
-  console.log(
-    `[${moment().format(
-      'HH:mm:ss'
-    )}] All staking transactions completed. Congratulations! Subscribe: https://t.me/HappyCuanAirdrop`
-      .blue
-  );
+  console.log(`[${moment().format('HH:mm:ss')}] All staking transactions completed. Congratulations! Subscribe: https://t.me/HappyCuanAirdrop`.blue);
 }
 
 const userChoice = readlineSync.question(
-  'Would you like to run the staking process:\n0: One-time run\n1: Automate with cron (every 24 hours)\nChoose 0 or 1: '
+  'Would you like to run the staking process:\n0: One-time run\n1: Automate with cron (every 24 hours)\nChoose 0 or 1: ',
 );
 
 if (userChoice === '0') {
@@ -116,27 +82,13 @@ if (userChoice === '0') {
 } else if (userChoice === '1') {
   runStakeGoon()
     .then(() => {
-      const job = new CronJob(
-        '0 0 * * *',
-        runStakeGoon,
-        null,
-        true,
-        'Asia/Jakarta'
-      );
+      const job = new CronJob('0 0 * * *', runStakeGoon, null, true, 'Asia/Jakarta');
       job.start();
-      console.log(
-        'Cron job started! The staking process will run every 24 hours. 🕒'.cyan
-      );
+      console.log('Cron job started! The staking process will run every 24 hours. 🕒'.cyan);
     })
     .catch((error) => {
-      console.log(
-        `[${moment().format('HH:mm:ss')}] Error setting up cron job: ${
-          error.message
-        }`.red
-      );
+      console.log(`[${moment().format('HH:mm:ss')}] Error setting up cron job: ${error.message}`.red);
     });
 } else {
-  console.log(
-    'Invalid choice! Please run the script again and select either 0 or 1.'.red
-  );
+  console.log('Invalid choice! Please run the script again and select either 0 or 1.'.red);
 }

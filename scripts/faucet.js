@@ -1,21 +1,12 @@
 const axios = require('axios');
 const moment = require('moment');
-const {
-  delay,
-  displayHeader,
-  logSuccess,
-  logError,
-} = require('../src/utils/utils');
+const { delay, displayHeader, logSuccess, logError } = require('../src/utils/utils');
 const { createWallet, getAddress } = require('../src/utils/wallet');
-const {
-  provider,
-  PRIVATE_KEY,
-  CONTRACT_ADDRESS,
-} = require('../src/utils/config');
+const { provider, PRIVATE_KEY, CONTRACT_ADDRESS } = require('../src/utils/config');
 
 (async () => {
   displayHeader();
-
+  // TO DO 改为批量领水，每轮 都随机间隔领取所有钱包的水
   while (true) {
     try {
       console.log('Starting the faucet claiming process...'.yellow);
@@ -24,21 +15,19 @@ const {
       console.log(`Using wallet address: ${walletAddress}`.yellow);
       console.log('Requesting tokens from the faucet...'.yellow);
 
-      const { data } = await axios.post(
-        'https://faucet.plumenetwork.xyz/api/faucet',
-        {
-          walletAddress,
-          token: 'ETH',
-        }
-      );
+      const { data } = await axios.post('https://faucet.plumenetwork.xyz/api/faucet', {
+        walletAddress,
+        token: 'ETH',
+        // token: 'GOON',
+      });
 
       const { salt, signature } = data;
 
       const wallet = createWallet(PRIVATE_KEY, provider);
       const transactionData = `0x103fc4520000000000000000000000000000000000000000000000000000000000000060${salt.substring(
-        2
+        2,
       )}00000000000000000000000000000000000000000000000000000000000000a0000000000000000000000000000000000000000000000000000000000000000345544800000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000041${signature.substring(
-        2
+        2,
       )}00000000000000000000000000000000000000000000000000000000000000`;
 
       try {
@@ -67,13 +56,12 @@ const {
         logError(error);
       }
     } catch (error) {
-      console.log(
-        `[${moment().format('HH:mm:ss')}] Critical error: ${error.message}`.red
-      );
+      console.log(`[${moment().format('HH:mm:ss')}] Critical error: ${error.message}`.red);
       break;
     }
 
-    console.log('Retrying in 10 seconds...'.yellow);
-    await delay(10000);
+    // console.log('Retrying in 30 seconds...'.yellow);
+    console.log('Retrying in 30 min...'.yellow);
+    await delay(30 * 60 * 1000);
   }
 })();

@@ -18,11 +18,12 @@ async function checkDailyStreak(wallet) {
   try {
     const feeData = await wallet.provider.getFeeData();
     const nonce = await provider.getTransactionCount(wallet.address);
-    const gasFee = feeData.gasPrice;
+    const gasFee = feeData.maxFeePerGas;
     const gasLimit = await wallet.estimateGas({
       data: CHECKIN_ABI.at(-1).data,
       to: CONTRACT,
     });
+
     const tx = {
       to: CONTRACT,
       from: wallet.address,
@@ -34,26 +35,13 @@ async function checkDailyStreak(wallet) {
 
     const result = await wallet.sendTransaction(tx);
     if (result.hash) {
-      console.log(
-        `[${moment().format('HH:mm:ss')}] Daily check-in for wallet ${
-          wallet.address
-        } has been successful! 🌟`.green
-      );
-      console.log(
-        `[${moment().format(
-          'HH:mm:ss'
-        )}] Transaction hash: https://testnet-explorer.plumenetwork.xyz/tx/${
-          result.hash
-        }`.green
-      );
+      console.log(`[${moment().format('HH:mm:ss')}] Daily check-in for wallet ${wallet.address} has been successful! 🌟`.green);
+      console.log(`[${moment().format('HH:mm:ss')}] Transaction hash: https://testnet-explorer.plumenetwork.xyz/tx/${result.hash}`.green);
       console.log('');
     }
   } catch (error) {
-    console.log(
-      `[${moment().format('HH:mm:ss')}] Your address (${
-        wallet.address
-      }) already did your daily check-in. Try again in 24 hours. 🚫`.red
-    );
+    console.log(error, 'error -----');
+    console.log(`[${moment().format('HH:mm:ss')}] Your address (${wallet.address}) already did your daily check-in. Try again in 24 hours. 🚫`.red);
     console.log('');
   }
 }
@@ -72,7 +60,7 @@ async function runCheckIn() {
 }
 
 const userChoice = readlineSync.question(
-  'Would you like to run the check-in:\n0: One-time run\n1: Automate with cron (every 24 hours)\nChoose 0 or 1: '
+  'Would you like to run the check-in:\n0: One-time run\n1: Automate with cron (every 24 hours)\nChoose 0 or 1: ',
 );
 
 if (userChoice === '0') {
@@ -80,27 +68,13 @@ if (userChoice === '0') {
 } else if (userChoice === '1') {
   runCheckIn()
     .then(() => {
-      const job = new CronJob(
-        '0 0 * * *',
-        runCheckIn,
-        null,
-        true,
-        'Asia/Jakarta'
-      );
+      const job = new CronJob('0 0 * * *', runCheckIn, null, true, 'Asia/Jakarta');
       job.start();
-      console.log(
-        'Cron job started! The check-in will run every 24 hours. 🕒'.cyan
-      );
+      console.log('Cron job started! The check-in will run every 24 hours. 🕒'.cyan);
     })
     .catch((error) => {
-      console.log(
-        `[${moment().format(
-          'HH:mm:ss'
-        )}] Error running check-in before setting up cron: ${error}`.red
-      );
+      console.log(`[${moment().format('HH:mm:ss')}] Error running check-in before setting up cron: ${error}`.red);
     });
 } else {
-  console.log(
-    'Invalid choice! Please run the script again and choose either 0 or 1.'.red
-  );
+  console.log('Invalid choice! Please run the script again and choose either 0 or 1.'.red);
 }
